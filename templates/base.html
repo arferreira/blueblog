@@ -5,8 +5,14 @@
     <title>BlueBlog</title>
   </head>
   <body>
+    {% block header %}
+    <ul>
+      <li><a href="#">Entrar</a></li>
+      <li><a href="#">Sair</a></li>
+      <li><a href="{% url 'user_registration' %}">Registrar conta</a></li>
+    </ul>
+    {% endblock %}
     {% block content %}
-
     {% endblock %}
   </body>
 </html>
