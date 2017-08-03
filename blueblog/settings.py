@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,6 @@ STATIC_URL = '/static/'
 
 # Redirecionamento após o Login
 LOGIN_REDIRECT_URL = '/'
+
+# definindo a rota para login
+LOGIN_URL = '/login/'
