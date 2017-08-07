@@ -9,7 +9,7 @@
 
     <ul>
     {% if request.user.is_authenticated %}
-      <li><a href="{% url 'new-blog' %}">Criar novo blog</a></li>
+      {% block logged_in_nav %}{% endblock %}
       <li><a href="{% url 'logout' %}">Sair</a></li>
     {% else %}
       <li><a href="{% url 'login' %}">Entrar</a></li>

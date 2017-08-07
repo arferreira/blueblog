@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1>Configurações do Blog</h1>
-  <form class="" action="{% url 'new-blog' %}" method="post">
+  <form class="" action="" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" name="" value="Salvar">
