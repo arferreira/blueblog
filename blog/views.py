@@ -85,13 +85,17 @@ class NewBlogPostView(CreateView):
         blog_post_obj.save()
 
         return HttpResponseRedirect(reverse('home'))
-        
+
 # definindo a view de edição dos posts do blog
 class UpdateBlogPostView(UpdateView):
     form_class = BlogPostForm
     template_name = 'blog_post.html'
     success_url = '/'
     model = BlogPost
+
+    def get_queryset(self):
+        queryset = super(UpdateBlogPostView, self).get_queryset()
+        return queryset.filter(blog__owner=self.request.user)
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
