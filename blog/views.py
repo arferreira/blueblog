@@ -4,6 +4,7 @@ from django.http.response import HttpResponseRedirect
 from django.utils.text import slugify
 from django.views.generic import CreateView, UpdateView
 from django.views.generic import TemplateView, DetailView
+from django.views.generic import View
 
 # importando o form para criação do Blog
 from blog.forms import BlogForm
@@ -105,3 +106,58 @@ class UpdateBlogPostView(UpdateView):
 class BlogPostDetailsView(DetailView):
     model = BlogPost
     template_name = 'blog_post_details.html'
+
+# definindo a visão de um blog para compartilhar um post
+class SharedBlogPostView(TemplateView):
+    template_name = 'share_blog_post.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(SharedBlogPostView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, pk, **kwargs):
+        blog_post = BlogPost.objects.get(pk=pk)
+        currently_shared_with = blog_post.shared_to.all()
+        currently_shared_with_ids = map(lambda x: x.pk, currently_shared_with)
+        exclude_from_can_share_list = [blog_post.blog.pk] + list(currently_shared_with_ids)
+
+        can_be_shared_with = Blog.objects.exclude(pk__in=exclude_from_can_share_list)
+
+        return {
+            'post': blog_post,
+            'is_shared_with': currently_shared_with,
+            'can_be_shared_with': can_be_shared_with
+        }
+
+    # definindo a visao para compartilhar o post
+class SharePostWithBlog(View):
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(SharePostWithBlog, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, post_pk, blog_pk):
+        blog_post = BlogPost.objects.get(pk=post_pk)
+        if blog_post.blog.owner != request.user:
+            return HttpResponseForbidden('Você só pode compartilhar posts que você criou!')
+
+        blog = Blog.objects.get(pk=blog_pk)
+        blog_post.shared_to.add(blog)
+
+        return HttpResponseRedirect(reverse('home'))
+
+
+    # definindo a view para pausar um compartilhamento de post com blog
+class StopSharingPostWithBlog(View):
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(StopSharingPostWithBlog, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, post_pk, blog_pk):
+        blog_post = BlogPost.objects.get(pk=post_pk)
+        if blog_post.blog.owner != request.user:
+            return HttpResponseForbidden('Você só pode parar de compartilhar posts que você criou!')
+
+        blog = Blog.objects.get(pk=blog_pk)
+        blog_post.shared_to.remove(blog)
+
+        return HttpResponseRedirect(reverse('home'))
